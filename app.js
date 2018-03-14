@@ -14,6 +14,30 @@ var campgrounds = [
   {
     name: "Governor Dodge",
     image: "/resources/img/1845906.png"
+  },
+  {
+    name: "Yellowstone Lake",
+    image: "/resources/img/548022.png"
+  },
+  {
+    name: "New Glarus Woods",
+    image: "/resources/img/839807.png"
+  },
+  {
+    name: "Governor Dodge",
+    image: "/resources/img/1845906.png"
+  },
+  {
+    name: "Yellowstone Lake",
+    image: "/resources/img/548022.png"
+  },
+  {
+    name: "New Glarus Woods",
+    image: "/resources/img/839807.png"
+  },
+  {
+    name: "Governor Dodge",
+    image: "/resources/img/1845906.png"
   }
 ];
 
