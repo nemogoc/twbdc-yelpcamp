@@ -1,50 +1,24 @@
-var express = require('express');
-var app = express();
-var bodyParser = require('body-parser');
+var express = require('express'),
+    app = express(),
+    mongoose = require('mongoose'),
+    bodyParser = require('body-parser');
 
-var campgrounds = [
-  {
-    name: "Yellowstone Lake",
-    image: "/resources/img/548022.png"
-  },
-  {
-    name: "New Glarus Woods",
-    image: "/resources/img/839807.png"
-  },
-  {
-    name: "Governor Dodge",
-    image: "/resources/img/1845906.png"
-  },
-  {
-    name: "Yellowstone Lake",
-    image: "/resources/img/548022.png"
-  },
-  {
-    name: "New Glarus Woods",
-    image: "/resources/img/839807.png"
-  },
-  {
-    name: "Governor Dodge",
-    image: "/resources/img/1845906.png"
-  },
-  {
-    name: "Yellowstone Lake",
-    image: "/resources/img/548022.png"
-  },
-  {
-    name: "New Glarus Woods",
-    image: "/resources/img/839807.png"
-  },
-  {
-    name: "Governor Dodge",
-    image: "/resources/img/1845906.png"
+mongoose.connect("mongodb://localhost/yelpcamp", function(err, body){
+  if(err){
+    console.log("Error connecting: " + err);
   }
-];
+});
+
+var campgroundSchema = new mongoose.Schema({
+  name: String,
+  image: String
+});
+
+var Campground = mongoose.model("Campground", campgroundSchema);
 
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
-
 
 
 app.get("/", function(req, res){
@@ -52,16 +26,21 @@ app.get("/", function(req, res){
 });
 
 app.post("/campgrounds", function(req, res){
-  campgrounds.push({
-    name: req.body.name,
-    image: req.body.url
-  });
+  createCampground(req.body.name, req.body.url);
+  //technically a race condition here, new campground may not render
 
   res.redirect("/campgrounds");
 });
 
 app.get("/campgrounds", function(req, res){
-  res.render("campgrounds", {campgrounds: campgrounds} );
+  Campground.find({}, function(err, campgrounds){
+    if (err){
+      console.log("Error getting campgrounds from db: " + err);
+    }
+    else {
+      res.render("campgrounds", {campgrounds: campgrounds} );
+    }
+  });
 });
 
 app.get("/campgrounds/new", function(req, res){
@@ -72,3 +51,34 @@ app.get("/campgrounds/new", function(req, res){
 app.listen(3000, function(){
   console.log("serving on port 3000");
 });
+
+
+//doesn't block, may introduce race condition
+function createCampground(name, image) {
+  Campground.create({ name: name, image: image }, function (err, ret) {
+    if (err) {
+      console.log("Error adding campground to db: " + err);
+    }
+  });
+}
+
+//This doesn't work yet because it doesn't block the render.
+function getCampgrounds(){
+  var campgrounds = [];
+  Campground.find({}, function(err, ret){
+    if (err){
+      console.log("Error getting campgrounds from db: " + err);
+    }
+    else {
+      console.log(ret);
+      ret.forEach(function(campgr){
+        campgrounds.push({
+          name: campgr.name,
+          image: campgr.image
+        })
+      });
+      console.log("In call: " + campgrounds);
+      return campgrounds;
+    }
+  });
+}
