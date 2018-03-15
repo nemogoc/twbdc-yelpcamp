@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 app.get("/", function(req, res){
-  res.render("index");
+  res.render("home");
 });
 
 //INDEX route - Displays list of all campgrounds
@@ -33,7 +33,7 @@ app.get("/campgrounds", function(req, res){
       console.log("Error getting campgrounds from db: " + err);
     }
     else {
-      res.render("campgrounds", {campgrounds: campgrounds} );
+      res.render("index", {campgrounds: campgrounds} );
     }
   });
 });
@@ -58,7 +58,7 @@ app.get("/campgrounds/:id", function(req, res){
       console.log(error);
     }
     else {
-      res.render("details", { campground: campground });
+      res.render("show", { campground: campground });
     }
   });
 });
