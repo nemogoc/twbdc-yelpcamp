@@ -33,6 +33,10 @@ app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+app.use(function(req, res, next){
+  res.locals.currentUser = req.user;
+  next();
+});
 
 
 app.get("/", function (req, res) {
@@ -78,7 +82,7 @@ app.get("/campgrounds/:id", function (req, res) {
 
 //COMMENTS
 //NEW
-app.get("/campgrounds/:id/comments/new", function (req, res) {
+app.get("/campgrounds/:id/comments/new", isLoggedIn, function (req, res) {
   Campground.findById(req.params.id, function (err, campground) {
     if (err) {
       console.log(err);
@@ -89,7 +93,7 @@ app.get("/campgrounds/:id/comments/new", function (req, res) {
   });
 });
 
-app.post("/campgrounds/:id/comments", function (req, res) {
+app.post("/campgrounds/:id/comments", isLoggedIn, function (req, res) {
   Campground.findById(req.params.id, function (err, campground) {
     if (err) {
       console.log(err);
@@ -154,4 +158,11 @@ function createCampground(name, image, description) {
       console.log("Error adding campground to db: " + err);
     }
   });
+}
+
+function isLoggedIn(req, res, next){
+  if(req.isAuthenticated()){
+    return next();
+  }
+  res.redirect("/login");
 }
