@@ -4,7 +4,13 @@ var express = require('express'),
   bodyParser = require('body-parser'),
   Campground = require('./models/campground'),
   Comment = require('./models/comment'),
-  seedDb = require('./seeds');
+  User = require('./models/user'),
+  seedDb = require('./seeds'),
+  passport = require('passport'),
+  LocalStrategy = require('passport-local'),
+
+  //TODO: maybe not used here
+  passportLocalMongoose = require('passport-local-mongoose');
 
 mongoose.connect("mongodb://localhost/yelpcamp", function (err, body) {
   if (err) {
@@ -17,6 +23,16 @@ seedDb();
 app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(require('express-session')({
+  secret: "There are some campgrounds here and they are pretty cool", //in a real app, this should be an env var
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 
 app.get("/", function (req, res) {
@@ -67,24 +83,43 @@ app.get("/campgrounds/:id/comments/new", function (req, res) {
     if (err) {
       console.log(err);
     }
-    else{
+    else {
       res.render("comments/new", {campground: campground});
     }
   });
 });
 
-app.post("/campgrounds/:id/comments", function(req, res){
-  Campground.findById(req.params.id, function (err, campground){
-    if (err){
+app.post("/campgrounds/:id/comments", function (req, res) {
+  Campground.findById(req.params.id, function (err, campground) {
+    if (err) {
       console.log(err);
     }
     else {
-      Comment.create(req.body.comment, function(err, comment){
+      Comment.create(req.body.comment, function (err, comment) {
         campground.comments.push(comment);
         campground.save();
         res.redirect("/campgrounds/" + campground._id);
       });
     }
+  });
+});
+
+//REGISTER
+
+app.get("/register", function (req, res) {
+  res.render("auth/register");
+});
+
+app.post("/register", function (req, res) {
+  User.register(new User({username: req.body.username}), req.body.password, function (err, user) {
+    if (err) {
+      console.log(err);
+      return res.render("/register");
+    }
+
+    passport.authenticate("local")(req, res, function() {
+      res.redirect("/campgrounds");
+    });
   });
 });
 
