@@ -15,14 +15,22 @@ router.get("/", function (req, res) {
 });
 
 //NEW route - Displays form to make new campground
-router.get("/new", function (req, res) {
+router.get("/new", isLoggedIn, function (req, res) {
   res.render("campgrounds/new");
 });
 
 //CREATE route - Adds new campground (from NEW form) to DB
-router.post("/", function (req, res) {
-  createCampground(req.body.name, req.body.url, req.body.description);
-  //technically a race condition here, new campground may not render
+router.post("/", isLoggedIn, function (req, res) {
+  var author = {
+    id: req.user._id,
+    username: req.user.username
+  };
+
+  Campground.create({name: req.body.name, image: req.body.url, description: req.body.description, author: author}, function (err, ret) {
+    if (err) {
+      console.log("Error adding campground to db: " + err);
+    }
+  });
 
   res.redirect("/campgrounds");
 });
@@ -39,14 +47,12 @@ router.get("/:id", function (req, res) {
   });
 });
 
-//doesn't block, may introduce race condition
-function createCampground(name, image, description) {
-  Campground.create({name: name, image: image, description: description}, function (err, ret) {
-    if (err) {
-      console.log("Error adding campground to db: " + err);
-    }
-  });
-}
 
+function isLoggedIn(req, res, next){
+  if(req.isAuthenticated()){
+    return next();
+  }
+  res.redirect("/login");
+}
 
 module.exports = router;
