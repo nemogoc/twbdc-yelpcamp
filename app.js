@@ -21,7 +21,7 @@ mongoose.connect("mongodb://localhost/yelpcamp", function (err, body) {
   }
 });
 
-seedDb();
+// seedDb();
 
 app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
