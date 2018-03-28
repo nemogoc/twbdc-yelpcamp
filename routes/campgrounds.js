@@ -56,7 +56,6 @@ router.get("/:id/edit", function(req, res){
     }
     res.render("campgrounds/edit", {campground: campground});
   });
-
 });
 
 //UPDATE
@@ -67,7 +66,17 @@ router.put("/:id", function(req, res){
       return res.redirect("/campgrounds");
     }
     res.redirect("/campgrounds/" + campground._id);
-  })
+  });
+});
+
+//DESTROY
+router.delete("/:id", function(req, res){
+  Campground.findByIdAndRemove(req.params.id, function(err){
+    if (err){
+      console.log(err);
+    }
+    res.redirect("/campgrounds");
+  });
 });
 
 function isLoggedIn(req, res, next){
