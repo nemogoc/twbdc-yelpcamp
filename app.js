@@ -5,10 +5,8 @@ var express = require('express'),
   User = require('./models/user'),
   seedDb = require('./seeds'),
   passport = require('passport'),
-  LocalStrategy = require('passport-local');
-
-  //TODO: maybe not used here
-  // var passportLocalMongoose = require('passport-local-mongoose');
+  LocalStrategy = require('passport-local'),
+  methodOverride = require('method-override');
 
 //routes
 var commentRoutes = require("./routes/comments"),
@@ -26,6 +24,7 @@ mongoose.connect("mongodb://localhost/yelpcamp", function (err, body) {
 app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(methodOverride("_method"));
 app.use(require('express-session')({
   secret: "There are some campgrounds here and they are pretty cool", //in a real app, this should be an env var
   resave: false,
@@ -43,6 +42,7 @@ app.use(function(req, res, next){
 app.use(authRoutes);
 app.use("/campgrounds", campgroundRoutes);
 app.use("/campgrounds/:id/comments", commentRoutes);
+
 
 
 app.listen(3000, function () {
