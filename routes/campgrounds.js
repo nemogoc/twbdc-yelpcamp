@@ -39,7 +39,7 @@ router.post("/", middleware.isLoggedIn, function (req, res) {
 //SHOW route - show more detail about one specific campground
 router.get("/:id", function (req, res) {
   Campground.findById(req.params.id).populate("comments").exec(function (err, campground) {
-    if (err) {
+    if (err || !campground) {
       console.log(err);
     }
     else {
